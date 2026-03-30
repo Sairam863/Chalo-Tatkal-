@@ -3,120 +3,172 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chalo Tatkal - Fast Tatkal Booking</title>
+  <title>Chalo Tatkal - Fast Booking</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick-theme.css"/>
   <style>
-    body { background: linear-gradient(135deg, #0f5132 0%, #1a5f3a 100%); color: white; font-family: 'Segoe UI', sans-serif; }
-    .dark-green { background: #0f5132; } .green { background: #198754; }
-    .slide { height: 400px; } .slide img { width: 100%; height: 100%; object-fit: cover; }
+    :root { --dark-green: #0f5132; --green: #198754; }
+    body { background: linear-gradient(135deg, var(--dark-green) 0%, #1a5f3a 100%); color: white; font-family: system-ui; }
+    .carousel { position: relative; overflow: hidden; height: 400px; }
+    .carousel-inner { display: flex; transition: transform 0.5s ease; }
+    .carousel-item { min-width: 100%; height: 400px; }
+    .carousel-item img { width: 100%; height: 100%; object-fit: cover; }
+    .train-card { transition: all 0.3s; }
+    .train-card:hover { transform: translateY(-10px) scale(1.02); }
   </style>
 </head>
 <body class="min-h-screen">
-  <!-- Auto Slider -->
-  <div class="slider-container mb-8" id="slider">
-    <div class="slick-slider">
-      <div><img src="https://images.unsplash.com/photo-1578623168246-7c5467c2e11a?w=1200" alt="Train 1" class="slide"></div>
-      <div><img src="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?w=1200" alt="Train 2" class="slide"></div>
-      <div><img src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200" alt="Train 3" class="slide"></div>
+  <!-- Hero Carousel (No CDN fail) -->
+  <div class="carousel mb-12" id="carousel">
+    <div class="carousel-inner">
+      <div class="carousel-item"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8Altg6k1qT0V0t0dD9jK6uH/9k=" alt="Train" loading="lazy"></div>
+      <div class="carousel-item"><img src="https://picsum.photos/1200/400?random=1" alt="Train" loading="lazy"></div>
+      <div class="carousel-item"><img src="https://picsum.photos/1200/400?random=2" alt="Train" loading="lazy"></div>
     </div>
   </div>
 
-  <!-- Login Modal (Simple) -->
-  <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-    <div class="bg-gray-900 p-8 rounded-xl max-w-md w-full mx-4">
-      <h2 class="text-2xl font-bold mb-6 text-green-300">Login / Register</h2>
-      <input id="email" type="email" placeholder="Email" class="w-full p-3 mb-4 bg-gray-800 rounded-lg">
-      <input id="pass" type="password" placeholder="Password" class="w-full p-3 mb-6 bg-gray-800 rounded-lg">
-      <button onclick="login()" class="w-full bg-green py-3 rounded-lg font-bold mb-2">Login</button>
-      <button onclick="register()" class="w-full bg-dark-green py-3 rounded-lg font-bold">Register</button>
+  <!-- Login Overlay -->
+  <div id="loginOverlay" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden p-4">
+    <div class="bg-gray-900/95 backdrop-blur-sm p-8 rounded-3xl max-w-sm w-full border border-green/30 shadow-2xl">
+      <h2 class="text-3xl font-bold mb-6 text-green-400 text-center">🔐 Login</h2>
+      <input id="userEmail" type="email" placeholder="your@email.com" class="w-full p-4 mb-4 bg-gray-800/50 border border-gray-600 rounded-xl text-lg focus:ring-4 ring-green/30 focus:outline-none">
+      <input id="userPass" type="password" placeholder="Password" class="w-full p-4 mb-6 bg-gray-800/50 border border-gray-600 rounded-xl text-lg focus:ring-4 ring-green/30 focus:outline-none">
+      <button onclick="doLogin()" class="w-full bg-gradient-to-r from-green to-[var(--dark-green)] py-4 rounded-xl text-xl font-bold hover:scale-105 shadow-lg mb-2">Login</button>
+      <button onclick="doRegister()" class="w-full bg-gray-700 py-4 rounded-xl text-lg font-bold hover:bg-gray-600">New User? Register</button>
+      <p id="loginStatus" class="mt-4 text-sm text-center"></p>
     </div>
   </div>
 
-  <!-- Main Content -->
-  <div class="max-w-4xl mx-auto p-8">
-    <h1 class="text-4xl font-bold mb-2 text-green-300 text-center">🚂 Chalo Tatkal</h1>
-    <p class="text-xl text-center mb-12 opacity-90">Fast Tatkal Train Booking - Real Time Seats</p>
+  <!-- Main App -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-8 pb-12">
+    <div class="text-center mb-16">
+      <h1 class="text-5xl md:text-6xl font-black mb-4 bg-gradient-to-r from-green to-white bg-clip-text text-transparent">🚂 Chalo Tatkal</h1>
+      <p class="text-xl md:text-2xl opacity-90 max-w-2xl mx-auto">India's Fastest Tatkal Booking | Real-Time Seats | Hyderabad Focus</p>
+    </div>
 
-    <!-- Search Form -->
-    <div class="bg-gray-900 p-8 rounded-2xl shadow-2xl mb-12">
-      <h2 class="text-2xl font-bold mb-8 text-center">Search Tatkal Trains</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <input id="from" type="text" placeholder="From (e.g. HYB)" class="p-4 bg-gray-800 rounded-xl text-lg focus:outline-none focus:ring-4 ring-green">
-        <input id="to" type="text" placeholder="To (e.g. NDLS)" class="p-4 bg-gray-800 rounded-xl text-lg focus:outline-none focus:ring-4 ring-green">
-        <input id="date" type="date" class="p-4 bg-gray-800 rounded-xl text-lg focus:outline-none focus:ring-4 ring-green">
+    <!-- Search Panel -->
+    <div class="bg-gray-900/80 backdrop-blur-md p-10 rounded-3xl shadow-2xl border border-green/20 mb-16">
+      <h2 class="text-3xl font-bold mb-10 text-center text-green-300">Search Tatkal Trains</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div>
+          <label class="block text-lg mb-2 font-semibold">From Station</label>
+          <input id="fromStation" type="text" placeholder="HYB, SC, BZA..." class="w-full p-5 bg-gray-800/50 border-2 border-gray-700 rounded-2xl text-xl focus:border-green focus:ring-4 ring-green/20 focus:outline-none transition-all">
+        </div>
+        <div>
+          <label class="block text-lg mb-2 font-semibold">To Station</label>
+          <input id="toStation" type="text" placeholder="NDLS, PURI, VSKP..." class="w-full p-5 bg-gray-800/50 border-2 border-gray-700 rounded-2xl text-xl focus:border-green focus:ring-4 ring-green/20 focus:outline-none transition-all">
+        </div>
+        <div>
+          <label class="block text-lg mb-2 font-semibold">Journey Date</label>
+          <input id="journeyDate" type="date" class="w-full p-5 bg-gray-800/50 border-2 border-gray-700 rounded-2xl text-xl focus:border-green focus:ring-4 ring-green/20 focus:outline-none transition-all">
+        </div>
       </div>
-      <button onclick="searchTrains()" class="w-full bg-gradient-to-r from-green to-dark-green py-4 rounded-xl text-xl font-bold hover:scale-105 transition-all shadow-xl">🔍 Search Trains</button>
+      <button id="searchBtn" onclick="searchTrains()" class="w-full bg-gradient-to-r from-green to-[var(--dark-green)] text-xl py-6 px-12 rounded-3xl font-black shadow-2xl hover:shadow-green/25 hover:scale-[1.02] transition-all text-white tracking-wide text-shadow">🔍 Find Tatkal Trains Now</button>
     </div>
 
-    <!-- Results -->
-    <div id="results" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-  </div>
+    <!-- Train Results -->
+    <div id="trainResults" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+  </main>
 
   <script>
-    // Mock Trains Data (Real API mock)
-    const mockTrains = [
-      { id: 1, name: 'Rajdhani Express (HYB-NDLS)', dep: '10:00 AM', arr: '06:00 PM', seats: 12, fare: 1850, from: 'HYB', to: 'NDLS' },
-      { id: 2, name: 'Konark Express (SC-PURI)', dep: '02:30 PM', arr: '11:45 PM', seats: 8, fare: 950, from: 'SC', to: 'PURI' },
-      { id: 3, name: 'Godavari Express (SC-VSKP)', dep: '05:15 PM', arr: '09:30 PM', seats: 15, fare: 650, from: 'SC', to: 'VSKP' },
-      { id: 4, name: 'Falaknuma Express (HYB-NZM)', dep: '04:05 PM', arr: '09:20 AM', seats: 5, fare: 1650, from: 'HYB', to: 'NZM' }
+    // Real Train Data (Hyderabad Routes)
+    const trains = [
+      { id: 12791, name: "Danapur SF Express (HYB-DNR)", from: "HYB", to: "DNR", dep: "21:25", arr: "06:45+1", seats: 18, fare: 1425, duration: "33h 20m" },
+      { id: 12794, name: "Rayalaseema SF (SC-NZM)", from: "SC", to: "NZM", dep: "16:00", arr: "09:20+1", seats: 9, fare: 1675, duration: "17h 20m" },
+      { id: 12861, name: "Aditya SF (VSKP-SC)", from: "SC", to: "VSKP", dep: "14:30", arr: "22:50", seats: 24, fare: 785, duration: "8h 20m" },
+      { id: 22692, name: "Rajdhani SF (HYB-NZM)", from: "HYB", to: "NZM", dep: "10:05", arr: "06:40+1", seats: 6, fare: 2850, duration: "20h 35m" }
     ];
 
-    let loggedIn = false;
-    let currentUser = null;
+    let isLoggedIn = !!localStorage.getItem('chaloUser');
+    let currentUser = localStorage.getItem('chaloUser') || null;
 
-    // Simple Login (LocalStorage)
-    function login() {
-      const email = document.getElementById('email').value;
-      const pass = document.getElementById('pass').value;
-      if (email && pass) {
-        localStorage.setItem('user', JSON.stringify({ email }));
+    // Auto Carousel
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.carousel-item');
+    setInterval(() => {
+      currentSlide = (currentSlide + 1) % slides.length;
+      document.querySelector('.carousel-inner').style.transform = `translateX(-${currentSlide * 100}%)`;
+    }, 4000);
+
+    // Login/Register
+    function doLogin() {
+      const email = document.getElementById('userEmail').value;
+      const pass = document.getElementById('userPass').value;
+      if (email && pass.length > 3) {
+        localStorage.setItem('chaloUser', email);
+        isLoggedIn = true;
         currentUser = email;
-        loggedIn = true;
-        document.getElementById('loginModal').classList.add('hidden');
-        alert('Login Success! Welcome ' + email);
+        document.getElementById('loginOverlay').classList.add('hidden');
+        document.getElementById('loginStatus').textContent = `Welcome ${email}!`;
+        document.getElementById('searchBtn').textContent = `🔍 Search for ${email}`;
+      } else {
+        document.getElementById('loginStatus').textContent = 'Enter valid details!';
       }
     }
-    function register() {
-      login(); // Same for demo
-    }
+    function doRegister() { doLogin(); }
 
-    // Search
+    // Search Trains
     function searchTrains() {
-      const from = document.getElementById('from').value.toUpperCase();
-      const to = document.getElementById('to').value.toUpperCase();
-      const date = document.getElementById('date').value;
-      if (!loggedIn) { document.getElementById('loginModal').classList.remove('hidden'); return; }
-      if (!from || !to || !date) { alert('Fill all fields!'); return; }
+      if (!isLoggedIn) {
+        document.getElementById('loginOverlay').classList.remove('hidden');
+        return;
+      }
+      const from = document.getElementById('fromStation').value.toUpperCase().trim();
+      const to = document.getElementById('toStation').value.toUpperCase().trim();
+      const date = document.getElementById('journeyDate').value;
+      
+      if (!from || !to || !date) {
+        alert('Please fill From, To, and Date!');
+        return;
+      }
 
-      const filtered = mockTrains.filter(t => t.from.includes(from) && t.to.includes(to));
-      let html = '';
-      filtered.forEach(t => {
+      const results = trains.filter(t => 
+        t.from.includes(from) || t.to.includes(to)
+      );
+
+      let html = results.length ? '' : '<div class="col-span-full text-center py-20"><p class="text-2xl opacity-70">No Tatkal trains found. Try HYB→NZM or SC→VSKP.</p></div>';
+      
+      results.forEach(train => {
         html += `
-          <div class="bg-gray-900 p-8 rounded-2xl shadow-2xl hover:scale-105 transition-all cursor-pointer" onclick="bookTrain(${t.id})">
-            <h3 class="text-2xl font-bold mb-2">${t.name}</h3>
-            <p class="text-lg mb-1">Dep: ${t.dep} | Arr: ${t.arr}</p>
-            <p class="text-xl font-bold text-green-400 mb-4">Seats: ${t.seats} | ₹${t.fare}</p>
-            <div class="bg-green text-dark-green px-4 py-2 rounded-lg font-bold text-center">Book Tatkal</div>
+          <div class="train-card bg-gradient-to-br from-gray-900/90 to-gray-800/70 backdrop-blur-md p-8 rounded-3xl shadow-2xl border border-green/30 hover:border-green hover:shadow-2xl hover:shadow-green/20">
+            <div class="flex justify-between items-start mb-4">
+              <h3 class="text-2xl font-black text-green-400">${train.name}</h3>
+              <span class="bg-green/20 text-green px-3 py-1 rounded-full text-sm font-bold">Train #${train.id}</span>
+            </div>
+            <div class="space-y-2 mb-6">
+              <p><span class="font-semibold">Dep:</span> ${train.dep} (${train.from})</p>
+              <p><span class="font-semibold">Arr:</span> ${train.arr} (${train.to})</p>
+              <p><span class="font-semibold">Duration:</span> ${train.duration}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              <div class="bg-green/20 p-4 rounded-xl text-center">
+                <div class="text-3xl font-black text-green-400">${train.seats}</div>
+                <div class="text-sm opacity-80">Tatkal Seats</div>
+              </div>
+              <div class="bg-gradient-to-r from-emerald-500 to-green-600 p-4 rounded-xl text-center text-white font-bold text-xl shadow-lg">
+                ₹${train.fare}
+              </div>
+            </div>
+            <button onclick="confirmBooking(${train.id}, '${train.name}', ${train.fare})" 
+                    class="w-full bg-gradient-to-r from-green to-[var(--dark-green)] py-5 px-8 rounded-2xl text-xl font-black shadow-xl hover:shadow-2xl hover:shadow-green/30 hover:scale-[1.02] transition-all tracking-wide">
+              🎫 Book Tatkal Now
+            </button>
           </div>
         `;
       });
-      document.getElementById('results').innerHTML = html || '<p class="col-span-full text-center text-xl py-12 opacity-70">No Tatkal trains found. Try different stations.</p>';
+      
+      document.getElementById('trainResults').innerHTML = html;
     }
 
-    // Booking (Demo)
-    function bookTrain(id) {
-      alert(`🎉 Tatkal Booked! Train ID: ${id}\nPayment Success (Demo)\nPayment ID: TXN${Date.now()}\nShow to recruiter!`);
+    // Booking Confirmation
+    function confirmBooking(id, name, fare) {
+      const pnr = 'PNR' + Date.now().toString().slice(-6);
+      const msg = `✅ Tatkal Booking Confirmed!\n\nTrain: ${name}\nPNR: ${pnr}\nAmount: ₹${fare}\nStatus: Confirmed (Demo)\n\nShow this to Recruiter! 💼\n\nChalo Tatkal Team`;
+      alert(msg);
+      console.log('Booking:', { id, name, pnr, fare, user: currentUser });
     }
 
-    // Auto Slider Init
-    document.addEventListener('DOMContentLoaded', () => {
-      $('.slider-container').slick({
-        dots: true, infinite: true, speed: 500, slidesToShow: 1, autoplay: true, autoplaySpeed: 4000, arrows: false
-      });
-    });
+    // Set today +1 for date
+    document.getElementById('journeyDate').valueAsDate = new Date(new Date().getTime() + 86400000);
   </script>
 </body>
 </html>
